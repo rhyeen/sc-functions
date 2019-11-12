@@ -20,6 +20,6 @@ export const helloWorld = functions.https.onRequest((request, response) => {
 
 export const newGame = functions.https.onRequest((request, response) => {
   return cors(request, response, () => {
-    response.status(200).json({ data: { game: GameService.newGame().json() }});
+    response.status(200).json({ data: { game: GameService.newGame().json(true, true) }});
   });
 });
