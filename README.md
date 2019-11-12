@@ -48,3 +48,7 @@ npm run serve
 ### Deployment
 
 For deployment, I use [Firebase Functions](https://firebase.google.com/docs/functions/). Since **Sharded Cards** does not have an Open Source license, you are not permitted to deploy the code to a public URL.
+
+```
+firebase deploy
+```
