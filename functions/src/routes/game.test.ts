@@ -1,7 +1,8 @@
 import admin from 'firebase-admin';
 import sinon from 'sinon';
 import firebaseFunctionsTest from 'firebase-functions-test';
-import * as myFunctions from './index';
+// @NOTE: need to hit the actual index since admin.initializeApp() needs to be called.
+import * as myFunctions from '../index';
 let adminInitStub;
 
 beforeEach(() => {
@@ -13,7 +14,7 @@ afterEach(() => {
   firebaseFunctionsTest().cleanup();
 });
 
-describe('helloWorld', () => {
+describe('newGame', () => {
   test('no input', () => {
     const req = { headers: { origins: true } };
     const res = {
@@ -22,11 +23,13 @@ describe('helloWorld', () => {
       status: (code: number) => {
         expect(code).toEqual(200);
         return { json: (body: any) => {
-          expect(body).toEqual({ data: { text: 'Hello Sharded Cards!' } });
+          expect(body.data.game.cardSets['MC143']).toEqual({ 
+            baseCard: { attack: 4, hash: 'MC143', health: 1, id: 'CD_THORN_SPITTER_VINE', level: 2, name: 'Thorn Spitter Vine', range: 3, rarity: 'common', type: 'minion' },
+            instances: [ { id: 'MC143_0' }] 
+          });
         }};
       }
     };
-    myFunctions.helloWorld(req as any, res as any);
+    myFunctions.newGame(req as any, res as any);
   });
 });
-

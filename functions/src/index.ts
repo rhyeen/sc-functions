@@ -13,5 +13,6 @@ export const helloWorld = functions.https.onRequest((request, response) => {
   });
 });
 
-export { newGame } from './routes/game';
-export { generateSeed, updatedTags } from './routes/admin';
+// @NOTE: get all routes
+export { newGame } from './routes/game'; 
+export { generateSeed, updateTags } from './routes/admin';
