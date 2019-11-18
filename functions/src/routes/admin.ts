@@ -6,10 +6,28 @@ const cors = require('cors')({
   origin: true,
 });
 
+async function validateAdminToken(adminToken) {
+  const adminUser = await firestoreDB.collection('admintokens').doc(adminToken).get();
+  return adminUser.exists;
+}
+
 export const generateSeed = functions.https.onRequest((request, response) => {
   return cors(request, response, async () => {
     try {
-      const dungeonCondition = await firestoreDB.collection('dungeonconditions').doc(request.body.dungeonId).get();
+      if (!request.body.data.adminToken) {
+        response.status(400).json({ data: { err: 'adminToken in body cannot be empty' }});
+        return;
+      }
+      const isAdmin = await validateAdminToken(request.body.data.adminToken);
+      if (!isAdmin) {
+        response.status(403).json({ data: { err: 'invalid adminToken' }});
+        return;
+      }
+      if (!request.body.data.body.dungeonId) {
+        response.status(400).json({ data: { err: 'dungeonId in body cannot be empty' }});
+        return;
+      }
+      const dungeonCondition = await firestoreDB.collection('dungeonconditions').doc(request.body.data.body.dungeonId).get();
       const dungeonConditionData = dungeonCondition.data();
       const cardIds = Object.keys(dungeonConditionData.cards);
       const promises = [];
@@ -19,10 +37,11 @@ export const generateSeed = functions.https.onRequest((request, response) => {
       const dungeonCards = await Promise.all(promises);
       const dungeonSeed = { 
         ...dungeonConditionData,
-        dungeoncards: []
+        dungeoncards: {}
       };
       for (const dungeonCard of dungeonCards) {
-        dungeonSeed.dungeoncards.push(dungeonCard.data());
+        let dungeonCardData = dungeonCard.data();
+        dungeonSeed.dungeoncards[dungeonCardData.id] = dungeonCardData;
       }
       const dungeonSeedRef = await firestoreDB.collection('dungeonseeds').add(dungeonSeed);
       response.status(200).json({ data: { seed: dungeonSeedRef.id }});
@@ -32,46 +51,6 @@ export const generateSeed = functions.https.onRequest((request, response) => {
     }
   });
 });
-
-// export const generateSeed = functions.https.onRequest((request, response) => {
-//   return cors(request, response, () => {
-//     db.collection('dungeonconditions').doc(request.body.dungeonId).get()
-//     .then(dungeonCondition => {
-//       const dungeonConditionData = dungeonCondition.data();
-//       const cardIds = dungeonConditionData.cards.keys();
-//       const promises = [];
-//       for (const cardId of cardIds) {
-//         promises.push(db.collection('dungeoncards').doc(cardId).get());
-//       }
-//       Promise.all(promises)
-//       .then(dungeonCards => {
-//         const dungeonSeed = { 
-//           ...dungeonConditionData,
-//           dungeoncards: []
-//         };
-//         for (const dungeonCard of dungeonCards) {
-//           dungeonSeed.dungeoncards.push(dungeonCard.data());
-//         }
-//         db.collection('dungeonseeds').add(dungeonSeed)
-//         .then(dungeonSeedRef => {
-//           response.status(200).json({ data: { seed: dungeonSeedRef.id }});
-//         })
-//         .catch(err => {
-//           console.error(err);
-//           response.status(500).json({ data: { err }});
-//         });
-//       })
-//       .catch(err => {
-//         console.error(err);
-//         response.status(500).json({ data: { err }});
-//       });
-//     })
-//     .catch(err => {
-//       console.error(err);
-//       response.status(500).json({ data: { err }});
-//     });
-//   });
-// });
 
 export const updateTags = functions.https.onRequest((request, response) => {
   return cors(request, response, () => {

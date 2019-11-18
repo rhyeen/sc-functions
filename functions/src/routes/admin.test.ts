@@ -11,7 +11,10 @@ beforeEach(() => {
   adminInitStub = sinon.stub(admin, 'initializeApp');
   dbCollectionStub = sinon.stub(firestoreDB, 'collection');
   docsStub = sinon.stub();
-  addStub= sinon.stub();
+  addStub = sinon.stub();
+  firestoreGetStub('admintokens', 'IS_ADMIN', {
+    void: false
+  });
 });
 
 afterEach(() => {
@@ -50,28 +53,36 @@ describe('generateSeed', () => {
       name: 'default test'
     };
     firestoreGetStub('dungeonconditions', 'test', dungeonCondition);
-    const cards = [
-      {
+    const cards = {
+      'CD_1': {
         id: 'CD_1',
         name: 'test card 1'
       },
-      {
+      'CD_2': {
         id: 'CD_2',
         name: 'test card 2'
       },
-      {
+      'CD_3': {
         id: 'CD_3',
         name: 'test card 3'
       }
-    ];
-    for (const card of cards) {
-      firestoreGetStub('dungeoncards', card.id, card);
+    }
+    for (const cardId in cards) {
+      firestoreGetStub('dungeoncards', cardId, cards[cardId]);
     }
     firestoreAddStub('dungeonseeds', {
       ...dungeonCondition,
-      dungeoncards: [...cards]
+      dungeoncards: { ...cards }
     }, '123');
-    const req = { headers: { origins: true }, body: { dungeonId: 'test' } };
+    const body = { 
+      data: {
+        body: {
+          dungeonId: 'test'
+        },
+        adminToken: 'IS_ADMIN'
+      },
+    };
+    const req = { headers: { origins: true }, body };
     const res = {
       setHeader: () => {},
       getHeader: () => {},
