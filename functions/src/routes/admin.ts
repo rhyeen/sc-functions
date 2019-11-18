@@ -1,4 +1,5 @@
 import * as functions from 'firebase-functions';
+import * as admin from 'firebase-admin';
 
 import { firestoreDB } from '../services/firestore';
 
@@ -53,7 +54,41 @@ export const generateSeed = functions.https.onRequest((request, response) => {
 });
 
 export const updateTags = functions.https.onRequest((request, response) => {
-  return cors(request, response, () => {
+  return cors(request, response, async () => {
+    try {
+      if (!request.body.data.adminToken) {
+        response.status(400).json({ data: { err: 'adminToken in body cannot be empty' }});
+        return;
+      }
+      const isAdmin = await validateAdminToken(request.body.data.adminToken);
+      if (!isAdmin) {
+        response.status(403).json({ data: { err: 'invalid adminToken' }});
+        return;
+      }
+      if (!request.body.data.body.dungeonId) {
+        response.status(400).json({ data: { err: 'dungeonId in body cannot be empty' }});
+        return;
+      }
+      if (!request.body.data.body.dungeonSeed) {
+        response.status(400).json({ data: { err: 'dungeonSeed in body cannot be empty' }});
+        return;
+      }
+      if (!request.body.data.body.tags || !request.body.data.body.tags.length) {
+        response.status(400).json({ data: { err: 'tags in body cannot be empty' }});
+        return;
+      }
+      const tags = {};
+      for (const tag of request.body.data.body.tags) {
+        tags[tag] = request.body.data.body.dungeonSeed;
+      }
+      await firestoreDB.collection('dungeontags').doc(request.body.data.body.dungeonId).update({
+        ...tags,
+        history: admin.firestore.FieldValue.arrayUnion(request.body.data.body.dungeonSeed)
+      });
       response.status(200).json({ data: { ok: true }});
+    } catch (err) {
+      console.error(err);
+      response.status(500).json({ data: { err }});
+    }
   });
 });

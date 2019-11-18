@@ -4,7 +4,7 @@ import firebaseFunctionsTest from 'firebase-functions-test';
 // @NOTE: need to hit the actual index since admin.initializeApp() needs to be called.
 import * as myFunctions from '../index';
 import { firestoreDB } from '../services/firestore';
-let adminInitStub, dbCollectionStub, docsStub, addStub;
+let adminInitStub, dbCollectionStub, docsStub, addStub, updateStub;
 
 
 beforeEach(() => {
@@ -12,6 +12,7 @@ beforeEach(() => {
   dbCollectionStub = sinon.stub(firestoreDB, 'collection');
   docsStub = sinon.stub();
   addStub = sinon.stub();
+  updateStub = sinon.stub();
   firestoreGetStub('admintokens', 'IS_ADMIN', {
     void: false
   });
@@ -40,6 +41,16 @@ function firestoreAddStub(collection: string, data:any, refId:string):void {
   addStub.withArgs(data).returns({
     id: refId
   });
+}
+
+function firestoreUpdateStub(collection: string, doc: string, updateData:any):void {
+  dbCollectionStub.withArgs(collection).returns({
+    doc: docsStub
+  });
+  docsStub.withArgs(doc).returns({
+    update: updateStub
+  });
+  updateStub.withArgs(updateData).returns(new Promise((resolve) => resolve()));
 }
 
 describe('generateSeed', () => {
@@ -98,8 +109,24 @@ describe('generateSeed', () => {
 });
 
 describe('updateTags', () => {
-  test('no input', () => {
-    const req = { headers: { origins: true } };
+  test('alter all but dev', () => {
+    firestoreUpdateStub('dungeontags', 'test', {
+      alpha: '123',
+      beta: '123',
+      stable: '123',
+      history: admin.firestore.FieldValue.arrayUnion('123')
+    });
+    const body = { 
+      data: {
+        body: {
+          dungeonId: 'test',
+          dungeonSeed: '123',
+          tags: ['stabe', 'alpha', 'beta']
+        },
+        adminToken: 'IS_ADMIN'
+      },
+    };
+    const req = { headers: { origins: true }, body };
     const res = {
       setHeader: () => {},
       getHeader: () => {},
