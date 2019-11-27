@@ -3,55 +3,24 @@ import sinon from 'sinon';
 import firebaseFunctionsTest from 'firebase-functions-test';
 // @NOTE: need to hit the actual index since admin.initializeApp() needs to be called.
 import * as myFunctions from '../index';
-import { firestoreDB } from '../services/firestore';
-let adminInitStub, dbCollectionStub, docsStub, addStub, updateStub;
+import { FirestoreStub } from '../test/stubs';
+
+let adminInitStub, firestoreStub;
 
 
 beforeEach(() => {
   adminInitStub = sinon.stub(admin, 'initializeApp');
-  dbCollectionStub = sinon.stub(firestoreDB, 'collection');
-  docsStub = sinon.stub();
-  addStub = sinon.stub();
-  updateStub = sinon.stub();
-  firestoreGetStub('admintokens', 'IS_ADMIN', {
+  firestoreStub = new FirestoreStub(firebaseFunctionsTest);
+  firestoreStub.get('admintokens', 'IS_ADMIN', {
     void: false
   });
 });
 
 afterEach(() => {
-  dbCollectionStub.restore();
+  firestoreStub.dbCollectionStub.restore();
   adminInitStub.restore();
   firebaseFunctionsTest().cleanup();
 });
-
-function firestoreGetStub(collection: string, doc: string, getSnapshotData:any):void {
-  dbCollectionStub.withArgs(collection).returns({
-    doc: docsStub
-  });
-  const snapshot = firebaseFunctionsTest().firestore.makeDocumentSnapshot(getSnapshotData, `${collection}/${doc}`);
-  docsStub.withArgs(doc).returns({
-    get: () => new Promise((resolve) => resolve(snapshot))
-  });
-}
-
-function firestoreAddStub(collection: string, data:any, refId:string):void {
-  dbCollectionStub.withArgs(collection).returns({
-    add: addStub
-  });
-  addStub.withArgs(data).returns({
-    id: refId
-  });
-}
-
-function firestoreUpdateStub(collection: string, doc: string, updateData:any):void {
-  dbCollectionStub.withArgs(collection).returns({
-    doc: docsStub
-  });
-  docsStub.withArgs(doc).returns({
-    update: updateStub
-  });
-  updateStub.withArgs(updateData).returns(new Promise((resolve) => resolve()));
-}
 
 describe('generateSeed', () => {
   test('no input', () => {
@@ -63,7 +32,7 @@ describe('generateSeed', () => {
       },
       name: 'default test'
     };
-    firestoreGetStub('dungeonconditions', 'test', dungeonCondition);
+    firestoreStub.get('dungeonconditions', 'test', dungeonCondition);
     const cards = {
       'CD_1': {
         id: 'CD_1',
@@ -79,9 +48,9 @@ describe('generateSeed', () => {
       }
     }
     for (const cardId in cards) {
-      firestoreGetStub('dungeoncards', cardId, cards[cardId]);
+      firestoreStub.get('dungeoncards', cardId, cards[cardId]);
     }
-    firestoreAddStub('dungeonseeds', {
+    firestoreStub.add('dungeonseeds', {
       ...dungeonCondition,
       dungeoncards: { ...cards }
     }, '123');
@@ -110,7 +79,7 @@ describe('generateSeed', () => {
 
 describe('updateTags', () => {
   test('alter all but dev', () => {
-    firestoreUpdateStub('dungeontags', 'test', {
+    firestoreStub.update('dungeontags', 'test', {
       alpha: '123',
       beta: '123',
       stable: '123',
