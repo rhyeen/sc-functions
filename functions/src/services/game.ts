@@ -1,5 +1,5 @@
 import { Game } from '@shardedcards/sc-types/node/game/entities/game.js';
-import { GameGenerator } from '@shardedcards/sc-types/node/game/services/game-generator/game-generator.js';
+import { GameGenerator } from '@shardedcards/sc-types/node/game/services/game-generators/game-generator.js';
 
 import { firestoreDB } from '../services/firestore';
 
