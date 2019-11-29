@@ -4,14 +4,17 @@ import { firestoreDB } from '../services/firestore';
 
 export class FirestoreStub {
   public dbCollectionStub: any;
-  public updateStub: any;
+  public updateStubData: Record<string, any>;
   public collectionStubData: Record<string, any>;
   public firebaseFunctionsTest: any;
 
   constructor(firebaseFunctionsTest: any) {
     this.dbCollectionStub = sinon.stub(firestoreDB, 'collection');
     this.collectionStubData = {};
-    this.updateStub = sinon.stub();
+    this.updateStubData = {
+      stub: sinon.stub(),
+      called: 0
+    }; 
     this.firebaseFunctionsTest = firebaseFunctionsTest;
   }
 
@@ -22,10 +25,12 @@ export class FirestoreStub {
       this.collectionStubData[collection] = {
         doc: {
           stub: sinon.stub(),
+          called: 0,
           return: {}
         },
         add: {
           stub: sinon.stub(),
+          called: 0,
           return: {}
         }
       };
@@ -46,6 +51,7 @@ export class FirestoreStub {
       collection: this.dbCollectionStub
     };
     this.collectionStubData[collection].doc.stub.withArgs(doc).returns(this.collectionStubData[collection].doc.return);
+    this.collectionStubData[collection].doc.called += 1;
   }
 
   get(collection: string, doc: string, getSnapshotData:any):void {
@@ -56,6 +62,7 @@ export class FirestoreStub {
       get: () => new Promise((resolve) => resolve(snapshot))
     };
     this.collectionStubData[collection].doc.stub.withArgs(doc).returns(this.collectionStubData[collection].doc.return);
+    this.collectionStubData[collection].doc.called += 1;
   }
     
   add(collection: string, data:any, refId:string):void {
@@ -65,18 +72,21 @@ export class FirestoreStub {
       id: refId
     };
     this.collectionStubData[collection].add.stub.withArgs(data).returns(this.collectionStubData[collection].add.return);
+    this.collectionStubData[collection].add.called += 1;
   }
   
   update(collection: string, doc: string, updateData:any):void {
     this.stubCollection(collection);
     this.collectionStubData[collection].doc.return = {
       ...this.collectionStubData[collection].doc.return,
-      update: this.updateStub
+      update: this.updateStubData.stub
     };
     this.collectionStubData[collection].doc.stub.withArgs(doc).returns(this.collectionStubData[collection].doc.return);
     // @NOTE: that the reason there doesn't need to be more than one updateStub is that
     // update always just returns a resolved promise, no matter the collection/docs/updateData.
-    this.updateStub.withArgs(updateData).returns(new Promise((resolve) => resolve()));
+    this.updateStubData.stub.withArgs(updateData).returns(new Promise((resolve) => resolve()));
+    this.updateStubData.called += 1;
+
   }
 
   restore():void {

@@ -29,7 +29,7 @@ export class GameService {
     const baseCardIds = GameService.extractUniqueCardIds(playerDeckData.basecards);
     const baseCards = {};
     for (const baseCardId of baseCardIds) {
-      let baseCard = await firestoreDB.collection('playerbasecards').doc(baseCardId).get();
+      const baseCard = await firestoreDB.collection('playerbasecards').doc(baseCardId).get();
       baseCards[baseCardId] = baseCard.data();
     }
     for (const baseCardId of playerDeckData.basecards) {

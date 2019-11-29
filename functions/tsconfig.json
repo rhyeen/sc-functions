@@ -10,6 +10,6 @@
     "typeRoots": ["./types", "./node_modules/@types"]
   },
   "compileOnSave": true,
-  "exclude": ["**/*.spec.ts", "**/*.test.ts", "./node_modules"],
+  "exclude": ["**/*.spec.ts", "**/*.test.ts", "./node_modules", "./src/test"],
   "include": ["./src/**/*.ts"]
 }

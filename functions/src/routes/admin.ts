@@ -41,7 +41,7 @@ export const generateSeed = functions.https.onRequest((request, response) => {
         dungeoncards: {}
       };
       for (const dungeonCard of dungeonCards) {
-        let dungeonCardData = dungeonCard.data();
+        const dungeonCardData = dungeonCard.data();
         dungeonSeed.dungeoncards[dungeonCardData.id] = dungeonCardData;
       }
       const dungeonSeedRef = await firestoreDB.collection('dungeonseeds').add(dungeonSeed);

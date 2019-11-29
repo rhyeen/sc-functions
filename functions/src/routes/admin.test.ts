@@ -23,7 +23,7 @@ afterEach(() => {
 });
 
 describe('generateSeed', () => {
-  test('no input', () => {
+  test('no input', done => {
     const dungeonCondition = {
       cards: {
         'CD_1': { weight: 1 },
@@ -62,6 +62,7 @@ describe('generateSeed', () => {
         adminToken: 'IS_ADMIN'
       },
     };
+    expect.assertions(2);
     const req = { headers: { origins: true }, body };
     const res = {
       setHeader: () => {},
@@ -70,6 +71,7 @@ describe('generateSeed', () => {
         expect(code).toEqual(200);
         return { json: (body: any) => {
           expect(body).toEqual({ data: { seed: '123' }});
+          done();
         }};
       }
     };
@@ -78,7 +80,7 @@ describe('generateSeed', () => {
 });
 
 describe('updateTags', () => {
-  test('alter all but dev', () => {
+  test('alter all but dev', done => {
     firestoreStub.update('dungeontags', 'test', {
       alpha: '123',
       beta: '123',
@@ -95,6 +97,7 @@ describe('updateTags', () => {
         adminToken: 'IS_ADMIN'
       },
     };
+    expect.assertions(2);
     const req = { headers: { origins: true }, body };
     const res = {
       setHeader: () => {},
@@ -103,6 +106,7 @@ describe('updateTags', () => {
         expect(code).toEqual(200);
         return { json: (body: any) => {
           expect(body).toEqual({ data: { ok: true }});
+          done();
         }};
       }
     };

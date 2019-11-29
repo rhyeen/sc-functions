@@ -31,7 +31,7 @@ function getFieldData() {
 }
 
 describe('newGame', () => {
-  test('happy path', () => {
+  test('happy path', done => {
     const playerData = {
       id: 'US_1',
       name: 'rhyeen'
@@ -45,11 +45,19 @@ describe('newGame', () => {
     const cards = {
       'CP_EN1': {
         id: 'CP_EN1',
-        name: 'Energize'
+        name: 'Energize',
+        rarity: 'standard',
+        type: 'spell',
+        abilities: [{ id: 'energize', amount: 1 }]
       },
       'CP_WS1': {
         id: 'CP_WS1',
-        name: 'Common Wisp'
+        name: 'Common Wisp',
+        rarity: 'standard',
+        type: 'minion',
+        attack: 1,
+        range: 2,
+        health: 3
       },
     }
     for (const cardId in cards) {
@@ -60,24 +68,24 @@ describe('newGame', () => {
     };
     firestoreStub.get('dungeontags', 'test', dungeonTagData);
     const dungeonSeedData = {
-      fields: [ getFieldData(), getFieldData(), getFieldData() ],
+      field: [ getFieldData(), getFieldData(), getFieldData() ],
       initial: { player: { energy: 10, handRefillSize: 5, health: 20 }},
       name: 'Default Delve',
       dungeoncards: {
         'CD_GP1': {
           id: 'CD_GP1',
-          name: 'Goblin Peon'
+          name: 'Goblin Peon',
+          rarity: 'common'
         },
         'CD_IU1': {
           id: 'CD_IU1',
-          name: 'Imp Underling'
+          name: 'Imp Underling',
+          rarity: 'common'
         }
       }
     };
-    firestoreStub.get('dungeonseeds', 'test', dungeonSeedData);
-    firestoreStub.add('dungeongames', {
-      id: 'TEMP',
-    }, '123');
+    firestoreStub.get('dungeonseeds', '1234', dungeonSeedData);
+    firestoreStub.add('dungeongames', sinon.match.any, '123');
     firestoreStub.update('dungeongames', '123', {
       id: '123',
     }, '123');
@@ -86,6 +94,7 @@ describe('newGame', () => {
       playerDeckId: 'DD_1',
       dungeonId: 'test'
     };
+    expect.assertions(5);
     const req = { headers: { origins: true }, body };
     const res = {
       setHeader: () => {},
@@ -93,10 +102,11 @@ describe('newGame', () => {
       status: (code: number) => {
         expect(code).toEqual(200);
         return { json: (body: any) => {
-          expect(body.data.game.cardSets['MC143']).toEqual({ 
-            baseCard: { attack: 4, hash: 'MC143', health: 1, id: 'CD_THORN_SPITTER_VINE', level: 2, name: 'Thorn Spitter Vine', range: 3, rarity: 'common', type: 'minion' },
-            instances: [ { id: 'MC143_0' }] 
-          });
+          expect(body.data.game.cardSets["MS312"].baseCard.name).toEqual("Common Wisp");
+          expect(body.data.game.cardSets["MS312"].instances.length).toEqual(1);
+          expect(body.data.game.cardSets["SS000|A;EN1"].baseCard.name).toEqual("Energize");
+          expect(body.data.game.cardSets["SS000|A;EN1"].instances.length).toEqual(1);
+          done();
         }};
       }
     };
