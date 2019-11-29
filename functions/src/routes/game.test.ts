@@ -13,7 +13,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  firestoreStub.dbCollectionStub.restore();
+  firestoreStub.restore();
   adminInitStub.restore();
   firebaseFunctionsTest().cleanup();
 });
@@ -40,6 +40,7 @@ describe('newGame', () => {
     const dungeonDeckData = {
       basecards: ['CP_EN1', 'CP_WS1', 'CP_WS1', 'CP_WS1', 'CP_WS1', 'CP_WS1', 'CP_WS1', 'CP_WS1', 'CP_WS1', 'CP_WS1']
     };
+    firestoreStub.stubSubCollection('players', 'US_1');
     firestoreStub.get('dungeondecks', 'DD_1', dungeonDeckData);
     const cards = {
       'CP_EN1': {
