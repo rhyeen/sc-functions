@@ -75,12 +75,18 @@ describe('newGame', () => {
         'CD_GP1': {
           id: 'CD_GP1',
           name: 'Goblin Peon',
-          rarity: 'common'
+          rarity: 'common',
+          attack: 1,
+          health: 2,
+          range: 1
         },
         'CD_IU1': {
           id: 'CD_IU1',
           name: 'Imp Underling',
-          rarity: 'common'
+          rarity: 'common',
+          attack: 1,
+          health: 3,
+          range: 1
         }
       }
     };
