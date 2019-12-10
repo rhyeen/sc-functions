@@ -90,9 +90,11 @@ describe('newGame', () => {
       id: '123',
     }, '123');
     const body = {
-      playerId: 'US_1',
-      playerDeckId: 'DD_1',
-      dungeonId: 'test'
+      data: {
+        playerId: 'US_1',
+        playerDeckId: 'DD_1',
+        dungeonId: 'test'
+      }
     };
     expect.assertions(5);
     const req = { headers: { origins: true }, body };
@@ -103,7 +105,7 @@ describe('newGame', () => {
         expect(code).toEqual(200);
         return { json: (body: any) => {
           expect(body.data.game.cardSets["MS312"].baseCard.name).toEqual("Common Wisp");
-          expect(body.data.game.cardSets["MS312"].instances.length).toEqual(1);
+          expect(body.data.game.cardSets["MS312"].instances.length).toEqual(9);
           expect(body.data.game.cardSets["SS000|A;EN1"].baseCard.name).toEqual("Energize");
           expect(body.data.game.cardSets["SS000|A;EN1"].instances.length).toEqual(1);
           done();
