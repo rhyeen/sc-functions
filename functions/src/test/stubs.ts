@@ -5,6 +5,7 @@ import { firestoreDB } from '../services/firestore';
 export class FirestoreStub {
   public dbCollectionStub: any;
   public updateStubData: Record<string, any>;
+  public setStubData: Record<string, any>;
   public collectionStubData: Record<string, any>;
   public firebaseFunctionsTest: any;
 
@@ -14,7 +15,11 @@ export class FirestoreStub {
     this.updateStubData = {
       stub: sinon.stub(),
       called: 0
-    }; 
+    };
+    this.setStubData = {
+      stub: sinon.stub(),
+      called: 0
+    };
     this.firebaseFunctionsTest = firebaseFunctionsTest;
   }
 
@@ -86,7 +91,19 @@ export class FirestoreStub {
     // update always just returns a resolved promise, no matter the collection/docs/updateData.
     this.updateStubData.stub.withArgs(updateData).returns(new Promise((resolve) => resolve()));
     this.updateStubData.called += 1;
+  }
 
+  set(collection: string, doc: string, setData:any):void {
+    this.stubCollection(collection);
+    this.collectionStubData[collection].doc.return = {
+      ...this.collectionStubData[collection].doc.return,
+      set: this.setStubData.stub
+    };
+    this.collectionStubData[collection].doc.stub.withArgs(doc).returns(this.collectionStubData[collection].doc.return);
+    // @NOTE: that the reason there doesn't need to be more than one updateStub is that
+    // update always just returns a resolved promise, no matter the collection/docs/updateData.
+    this.setStubData.stub.withArgs(setData).returns(new Promise((resolve) => resolve()));
+    this.setStubData.called += 1;
   }
 
   restore():void {

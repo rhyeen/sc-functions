@@ -14,5 +14,5 @@ export const helloWorld = functions.https.onRequest((request, response) => {
 });
 
 // @NOTE: get all routes
-export { newGame } from './routes/game'; 
+export { newGame, endTurn } from './routes/game'; 
 export { generateSeed, updateTags } from './routes/admin';

@@ -1,6 +1,6 @@
 import { Game } from '@shardedcards/sc-types/node/game/entities/game.js';
 import { GameGenerator } from '@shardedcards/sc-types/node/game/services/game-generators/game-generator.js';
-
+import { GameBuilder } from '@shardedcards/sc-types/node/game/services/builders/game-builder.js';
 import { firestoreDB } from '../services/firestore';
 
 
@@ -59,5 +59,14 @@ export class GameService {
     await firestoreDB.collection('dungeongames').doc(game.id).update({
       id: game.id
     });
+  }
+
+  static async getGame(gameId: string):Game {
+    const gameData = await firestoreDB.collection('dungeongames').doc(gameId).get();
+    return GameBuilder.buildGame(gameData.data());
+  }
+
+  static async setGame(game: Game) {
+    await firestoreDB.collection('dungeongames').doc(game.id).set(game.json(true, false));
   }
 }
