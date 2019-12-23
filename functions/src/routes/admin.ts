@@ -92,3 +92,29 @@ export const updateTags = functions.https.onRequest((request, response) => {
     }
   });
 });
+
+
+export const getGameWithHiddenDetails = functions.https.onRequest((request, response) => {
+  return cors(request, response, async () => {
+    try {
+      if (!request.body.data.adminToken) {
+        response.status(400).json({ data: { err: 'adminToken in body cannot be empty' }});
+        return;
+      }
+      const isAdmin = await validateAdminToken(request.body.data.adminToken);
+      if (!isAdmin) {
+        response.status(403).json({ data: { err: 'invalid adminToken' }});
+        return;
+      }
+      if (!request.body.data.body.gameId) {
+        response.status(400).json({ data: { err: 'gameId in body cannot be empty' }});
+        return;
+      }
+      const gameData = await firestoreDB.collection('dungeongames').doc(request.body.data.body.gameId).get();
+      response.status(200).json({ data: gameData.data()});
+    } catch (err) {
+      console.error(err);
+      response.status(500).json({ data: { err }});
+    }
+  });
+});
