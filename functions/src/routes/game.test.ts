@@ -395,7 +395,7 @@ describe('endTurn', () => {
         ]
       }
     };
-    expect.assertions(2);
+    expect.assertions(3);
     const req = { headers: { origins: true }, body };
     const res = {
       setHeader: () => {},
@@ -403,7 +403,8 @@ describe('endTurn', () => {
       status: (code: number) => {
         expect(code).toEqual(200);
         return { json: (body: any) => {
-          expect(body.data.test).toEqual("hello world");
+          expect(body.data.baseCards.length).toBe(1);
+          expect(body.data.craftingParts.length).toBe(3);
           done();
         }};
       }

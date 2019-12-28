@@ -16,7 +16,7 @@
   },
   "main": "lib/index.js",
   "dependencies": {
-    "@shardedcards/sc-types": "^0.6.1",
+    "@shardedcards/sc-types": "^0.8.2",
     "cors": "^2.8.5",
     "firebase-admin": "^8.0.0",
     "firebase-functions": "^3.1.0"

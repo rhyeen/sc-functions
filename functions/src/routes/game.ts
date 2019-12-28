@@ -1,6 +1,5 @@
 import * as functions from 'firebase-functions';
 import { GameService } from '../services/game';
-import { CraftService } from '../services/craft';
 import { TurnService } from '../services/turn';
 
 const cors = require('cors')({
@@ -61,9 +60,10 @@ export const endTurn = functions.https.onRequest((request, response) => {
         return;
       }
       const game = await TurnService.endPlayerTurn(gameId, turn);
-      console.log(JSON.stringify(game.json(true, false)));
-      const craftingSupplies = await CraftService.getCraftingSupplies(game);
-      response.status(200).json({ data: craftingSupplies });
+      response.status(200).json({ data: {
+        baseCards: game.player.craftingTable.jsonBaseCards(),
+        craftingParts: game.player.craftingTable.jsonCraftingParts(),
+      }});
     } catch (err) {
       console.error(err);
       response.status(500).json({ data: { msg: 'something unexpected occurred' }});
