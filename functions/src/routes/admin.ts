@@ -118,3 +118,4 @@ export const getGameWithHiddenDetails = functions.https.onRequest((request, resp
     }
   });
 });
+
