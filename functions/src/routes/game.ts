@@ -70,3 +70,33 @@ export const endTurn = functions.https.onRequest((request, response) => {
     }
   });
 });
+
+export const endCrafting = functions.https.onRequest((request, response) => {
+  return cors(request, response, async () => {
+    try {
+      if (!request.body.data) {
+        response.status(400).json({ data: { err: 'body properties must be wrapped in "data" object' }});
+        return;
+      }
+      const turn = request.body.data.turn;
+      if (!turn) {
+        response.status(400).json({ data: { err: 'turn in body.data cannot be empty' }});
+        return;
+      }
+      if (!Array.isArray(turn)) {
+        response.status(400).json({ data: { err: 'turn in body.data must be an array' }});
+        return;
+      }
+      const gameId = request.body.data.gameId;
+      if (!gameId) {
+        response.status(400).json({ data: { err: 'gameId in body.data cannot be empty' }});
+        return;
+      }
+      const game = await TurnService.endPlayerCraftingTurn(gameId, turn);
+      response.status(200).json({ data: { game: game.json(true, true) }});
+    } catch (err) {
+      console.error(err);
+      response.status(500).json({ data: { msg: 'something unexpected occurred' }});
+    }
+  });
+});

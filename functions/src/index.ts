@@ -14,6 +14,6 @@ export const helloWorld = functions.https.onRequest((request, response) => {
 });
 
 // @NOTE: get all routes
-export { newGame, endTurn } from './routes/game'; 
+export { newGame, endTurn, endCrafting } from './routes/game'; 
 export { generateSeed, updateTags, getGameWithHiddenDetails } from './routes/admin';
-export { getCardNames, createCard } from './routes/craft';
+export { getCardNames, addCardToDeck } from './routes/craft';
